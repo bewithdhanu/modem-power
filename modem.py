@@ -100,25 +100,39 @@ def automateModem():
     logging.info("Wi-Fi is connected!")
     battery = getBatteryPercent()
     logging.info('battery: ' + str(battery))
+    
     if battery is not None:
-        if battery > 80 :
+        if battery > 80:
             turnOff()
-            logging.info("Modem turned off")
+            logging.info("Modem turned off - battery above 80%")
             return {
                 "status": "off",
-                "battery": battery
+                "battery": battery,
+                "message": "Modem turned off - battery above 80%"
             }
-        if battery < 20:
+        elif battery < 20:
             turnOn()
-            logging.info("Modem turned on")
+            logging.info("Modem turned on - battery below 20%")
             return {
                 "status": "on",
-                "battery": battery
+                "battery": battery,
+                "message": "Modem turned on - battery below 20%"
             }
-    return {
-        "status": "error",
-        "battery": battery
-    }
+        else:
+            # Battery is between 20-80%, no action needed
+            logging.info(f"Battery at {battery}% - no action needed")
+            return {
+                "status": "ok",
+                "battery": battery,
+                "message": f"Battery at {battery}% - no action needed"
+            }
+    else:
+        logging.error("Failed to get battery percentage")
+        return {
+            "status": "error",
+            "battery": None,
+            "message": "Failed to get battery percentage"
+        }
 
 
 def turnOffDeviceByInternetCheck():

@@ -1,10 +1,21 @@
 import logging
 import threading
+import sys
 
 from flask import Flask, jsonify
 
 from modem import automateModem, restartModem, turnOffDeviceByInternetCheck
 from speaker import turnOnSpeaker
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/service.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 app = Flask(__name__)
 
