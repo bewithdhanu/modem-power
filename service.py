@@ -50,4 +50,4 @@ def main():
 
 if __name__ == '__main__':
     # Start the background task in a separate thread
-    app.run()
+    app.run(port=8765)

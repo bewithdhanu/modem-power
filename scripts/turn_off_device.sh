@@ -13,7 +13,7 @@ cd "$PROJECT_DIR"
 source venv/bin/activate
 
 # Make API call to turn off device
-curl -s "http://127.0.0.1:5000/turn-off-device" > /dev/null 2>&1
+curl -s "http://127.0.0.1:8765/turn-off-device" > /dev/null 2>&1
 
 # Log the action
 echo "$(date): Device turn-off script executed" >> "$PROJECT_DIR/logs/cron.log"

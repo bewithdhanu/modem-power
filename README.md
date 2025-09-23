@@ -75,7 +75,7 @@ Before you get started, ensure you have the following:
    ```
 
 2. **Access the web interface:**
-   - Open your browser and go to `http://127.0.0.1:5000`
+   - Open your browser and go to `http://127.0.0.1:8765`
 
 ### API Endpoints
 
@@ -200,9 +200,10 @@ ModemPower/
 ## Security Notes
 
 - Keep your `env.py` file secure and never commit it to version control
-- The service runs on localhost (127.0.0.1) by default
+- The service runs on localhost (127.0.0.1:8765) by default
 - All API calls are made over your local network
 - Tuya credentials are stored locally and encrypted by the Tuya SDK
+- Port 8765 is used to avoid conflicts with common services
 
 ## Contributing
 
