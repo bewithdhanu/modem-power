@@ -1,4 +1,4 @@
-from env import ENDPOINT, ACCESS_ID, ACCESS_KEY, USERNAME, PASSWORD
+from env import ENDPOINT, ACCESS_ID, ACCESS_KEY, USERNAME, PASSWORD, DEVICE_ID
 
 from tuya_iot import TuyaOpenAPI, TUYA_LOGGER
 import logging
@@ -10,15 +10,16 @@ openapi.connect(USERNAME, PASSWORD, "86", 'smartlife')
 # # Uncomment the following lines to see logs.
 
 TUYA_LOGGER.setLevel(logging.DEBUG)
-DEVICE_ID = "d78c1088123b5a2cb8ogmp"
 
 
 def turnOff():
+    logging.info("Turning off modem")
     commands = {'commands': [{"code": "switch_1", "value": False}, {"code": "countdown_1", "value": 0}]}
     openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
 
 
 def turnOn():
+    logging.info("Turning on modem")
     commands = {'commands': [{"code": "switch_1", "value": True}, {"code": "countdown_1", "value": 0}]}
     openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
 

@@ -1,9 +1,9 @@
 import logging
 import threading
 
-from flask import Flask
+from flask import Flask, jsonify
 
-from modem import automateModem, restartModem
+from modem import automateModem, restartModem, turnOffDeviceByInternetCheck
 from speaker import turnOnSpeaker
 
 app = Flask(__name__)
@@ -12,24 +12,40 @@ app = Flask(__name__)
 @app.route('/turn-on-speaker', methods=['GET'])
 def turn_on_speaker():
     turnOnSpeaker()
-    return 'Speaker turned on'
+    return jsonify({
+        "status": "success",
+        "message": "Speaker turned on"
+    })
 
 
 @app.route('/automate-modem', methods=['GET'])
 def automate_modem():
-    automateModem()
-    return 'Automate modem ran successfully'
+    result = automateModem()
+    return jsonify(result)
 
 
 @app.route('/restart-modem', methods=['GET'])
 def restart_modem():
     restartModem()
-    return 'Automate modem ran successfully'
+    return jsonify([])
+
+
+@app.route('/turn-off-device', methods=['GET'])
+def turn_off_device():
+    """
+    Turn off the device by checking internet connectivity.
+    Only turns off if internet is available (meaning we're connected to modem).
+    """
+    result = turnOffDeviceByInternetCheck()
+    return jsonify(result)
 
 
 @app.route('/', methods=['GET'])
 def main():
-    return 'Hello Dhanu!'
+    return jsonify({
+        "status": "success",
+        "message": "Hello Dhanu!"
+    })
 
 
 if __name__ == '__main__':

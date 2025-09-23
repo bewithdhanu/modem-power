@@ -1,3 +1,6 @@
 venv
 env.py
 .idea
+__pycache__
+logs
+.DS_Store
