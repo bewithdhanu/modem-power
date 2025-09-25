@@ -37,8 +37,14 @@ case "$1" in
         pkill -f "python.*service.py"
         echo "Flask service stopped"
         ;;
+    "restart-service")
+        echo "Restarting Flask service..."
+        pkill -f "python.*service.py" 2>/dev/null || true
+        sleep 2
+        $SCRIPTS_DIR/start_service.sh
+        ;;
     *)
-        echo "Usage: $0 [setup|status|remove|start-service|stop-service]"
+        echo "Usage: $0 [setup|status|remove|start-service|stop-service|restart-service]"
         echo ""
         echo "Commands:"
         echo "  setup         - Set up all ModemPower cron jobs"
@@ -46,5 +52,6 @@ case "$1" in
         echo "  remove        - Remove all ModemPower cron jobs"
         echo "  start-service - Start the Flask service manually"
         echo "  stop-service  - Stop the Flask service"
+        echo "  restart-service - Restart the Flask service"
         ;;
 esac

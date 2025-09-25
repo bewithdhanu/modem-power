@@ -48,56 +48,8 @@ def restartModem():
         print("Failed to restart")
 
 
-def is_wifi_connected():
-    """
-    Check if we have internet access by testing connectivity.
-    This is more reliable than trying to detect specific WiFi networks.
-    """
-    try:
-        # Method 1: Try to ping Google DNS (most reliable)
-        result = subprocess.run(['ping', '-c', '1', '-W', '3000', '8.8.8.8'], 
-                              capture_output=True, text=True, timeout=5)
-        if result.returncode == 0:
-            return True
-        
-        # Method 2: Try to ping Cloudflare DNS
-        result = subprocess.run(['ping', '-c', '1', '-W', '3000', '1.1.1.1'], 
-                              capture_output=True, text=True, timeout=5)
-        if result.returncode == 0:
-            return True
-        
-        # Method 3: Try to make an HTTP request to a reliable endpoint
-        try:
-            response = requests.get('http://httpbin.org/status/200', timeout=5)
-            if response.status_code == 200:
-                return True
-        except:
-            pass
-        
-        # Method 4: Check if we can resolve DNS
-        result = subprocess.run(['nslookup', 'google.com'], 
-                              capture_output=True, text=True, timeout=5)
-        if result.returncode == 0 and 'Address:' in result.stdout:
-            return True
-            
-        return False
-        
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError, Exception):
-        return False
-
-
-def wait_for_wifi_connection(timeout=300):
-    start_time = time.time()
-    while not is_wifi_connected():
-        if time.time() - start_time >= timeout:
-            logging.info("Timeout reached. Wi-Fi not connected.")
-            break
-        time.sleep(1)
-
 
 def automateModem():
-    wait_for_wifi_connection()
-    logging.info("Wi-Fi is connected!")
     battery = getBatteryPercent()
     logging.info('battery: ' + str(battery))
     
@@ -134,29 +86,33 @@ def automateModem():
             "message": "Failed to get battery percentage"
         }
 
+def turnOnCharger():
 
-def turnOffDeviceByInternetCheck():
-    """
-    Turn off the device by checking internet connectivity.
-    Only turns off if internet is available (meaning we're connected to modem).
-    """
     try:
-        # Check if we have internet connectivity
-        if is_wifi_connected():
-            logging.info("Internet connectivity confirmed, turning off device")
-            turnOff()
-            return {
-                "status": "success",
-                "message": "Device turned off successfully",
-                "internet_connected": True
-            }
-        else:
-            logging.info("No internet connectivity, device not turned off")
-            return {
-                "status": "error",
-                "message": "No internet connectivity detected. Cannot turn off device.",
-                "internet_connected": False
-            }
+        turnOn()
+        return {
+            "status": "success",
+            "message": "Device turned on successfully",
+            "internet_connected": True
+        }
+    except Exception as e:
+        logging.error(f"Error turning on device: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error turning on device: {str(e)}",
+            "internet_connected": False
+        }
+
+
+def turnOffCharger():
+
+    try:
+        turnOff()
+        return {
+            "status": "success",
+            "message": "Device turned off successfully",
+            "internet_connected": True
+        }
     except Exception as e:
         logging.error(f"Error turning off device: {str(e)}")
         return {

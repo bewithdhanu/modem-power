@@ -19,7 +19,9 @@ if pgrep -f "python.*service.py" > /dev/null; then
 fi
 
 # Start the service in background
-nohup python service.py > "$PROJECT_DIR/logs/service.log" 2>&1 &
+# Create date-based log filename
+LOG_DATE=$(date +%Y-%m-%d)
+nohup python service.py >> "$PROJECT_DIR/logs/service_$LOG_DATE.log" 2>&1 &
 
 # Log the action
 echo "$(date): Service started in background" >> "$PROJECT_DIR/logs/cron.log"

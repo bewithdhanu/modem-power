@@ -25,11 +25,8 @@ cat >> "$TEMP_CRON" << EOF
 # Start service on system startup (every reboot)
 @reboot $SCRIPTS_DIR/start_service.sh
 
-# Turn off device on system startup (every reboot)
-@reboot sleep 30 && $SCRIPTS_DIR/turn_off_device.sh
-
-# Turn off device on system shutdown (every day at 23:59)
-59 23 * * * $SCRIPTS_DIR/turn_off_device.sh
+# Turn on charger on system startup (every reboot)
+@reboot sleep 30 && $SCRIPTS_DIR/turn_on_charger.sh
 
 # Run automate-modem every 5 minutes
 */5 * * * * $SCRIPTS_DIR/automate_modem.sh
@@ -49,10 +46,9 @@ echo "Cron jobs have been set up successfully!"
 echo ""
 echo "Installed cron jobs:"
 echo "1. Start service on system startup"
-echo "2. Turn off device on system startup (after 30 seconds)"
-echo "3. Turn off device daily at 23:59"
-echo "4. Run automate-modem every 5 minutes"
-echo "5. Restart service daily at 2 AM"
+echo "2. Turn on charger on system startup (after 30 seconds)"
+echo "3. Run automate-modem every 5 minutes"
+echo "4. Restart service daily at 2 AM"
 echo ""
 echo "To view your cron jobs, run: crontab -l"
 echo "To remove all ModemPower cron jobs, run: crontab -e and remove lines containing 'ModemPower'"

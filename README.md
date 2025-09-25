@@ -113,7 +113,6 @@ The system automatically sets up the following cron jobs:
 - **@reboot**: Start Flask service on system startup
 - **@reboot + 30s**: Turn off device on system startup
 - **Every 5 minutes**: Run modem automation (check battery, manage power)
-- **Daily at 23:59**: Turn off device before sleep
 - **Daily at 2:00 AM**: Restart service to ensure it keeps running
 
 ### Scripts Overview
