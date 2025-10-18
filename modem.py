@@ -1,24 +1,34 @@
 import json
 import logging
-import subprocess
-import time
+import os
 
 import requests
 import xmltodict
 
-from device import getStatus, turnOff, turnOn
+from device import turnOff, turnOn
+
+# Get modem IP from environment variable or use default
+MODEM_IP = os.getenv('MODEM_IP', '192.168.1.1')
+
+def isModemReachable():
+    """Check if modem is reachable"""
+    try:
+        response = requests.get(f"http://{MODEM_IP}/", timeout=5)
+        return response.status_code == 200
+    except:
+        return False
 
 
 def getBatteryPercent():
     try:
-        url = "http://192.168.1.1/mark_title.w.xml"
+        url = f"http://{MODEM_IP}/mark_title.w.xml"
 
-        payload = {}
         headers = {
-            'Referer': 'http://192.168.1.1/index.html'
+            'Referer': f'http://{MODEM_IP}/index.html'
         }
 
-        response = requests.request("GET", url, headers=headers, data=payload)
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
 
         # Parse the XML data to a Python dictionary
         xml_dict = xmltodict.parse(response.text)
@@ -28,25 +38,37 @@ def getBatteryPercent():
 
         data_dict = json.loads(json_data)
         return int(data_dict['title']['batt_p'])
-    except:
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error getting battery from {MODEM_IP}: {e}")
+        return None
+    except (KeyError, ValueError, xmltodict.ParsingInterrupted) as e:
+        logging.error(f"Data parsing error: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected error getting battery: {e}")
         return None
 
 
 def restartModem():
     try:
-        url = "http://192.168.1.1/wxml/set_reboot.xml"
+        url = f"http://{MODEM_IP}/wxml/set_reboot.xml"
 
         payload = "reboot=1"
         headers = {
-            'Referer': 'http://192.168.1.1/index.html',
+            'Referer': f'http://{MODEM_IP}/index.html',
         }
 
-        response = requests.request("POST", url, headers=headers, data=payload)
-
-        print(response.text)
-    except:
-        print("Failed to restart")
-
+        response = requests.post(url, headers=headers, data=payload, timeout=10)
+        response.raise_for_status()
+        
+        logging.info(f"Modem restart response: {response.text}")
+        return True
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error restarting modem at {MODEM_IP}: {e}")
+        return False
+    except Exception as e:
+        logging.error(f"Unexpected error restarting modem: {e}")
+        return False
 
 
 def automateModem():
@@ -87,7 +109,6 @@ def automateModem():
         }
 
 def turnOnCharger():
-
     try:
         turnOn()
         return {
@@ -105,7 +126,6 @@ def turnOnCharger():
 
 
 def turnOffCharger():
-
     try:
         turnOff()
         return {
