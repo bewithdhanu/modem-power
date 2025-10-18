@@ -228,6 +228,9 @@ def setup_scheduler():
     logging.info("- Every 4 hours turn-on-charger")
     logging.info("- Automate-modem every 5 minutes")
     
+    # Turn on charger immediately
+    turn_on_charger()
+    
     # Start scheduler in a separate thread
     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
     scheduler_thread.start()
