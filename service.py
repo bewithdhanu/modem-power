@@ -49,6 +49,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize scheduler when the application starts"""
+    setup_scheduler()
+
 # Pydantic models for API documentation
 class StatusResponse(BaseModel):
     status: str
@@ -142,6 +147,31 @@ def restart_modem():
         return StatusResponse(status="error", message="Failed to restart modem")
 
 
+@app.get("/scheduler-status", response_model=StatusResponse, summary="Scheduler status", description="Check if the scheduler is running and show next scheduled jobs")
+def scheduler_status():
+    """Check scheduler status and show next scheduled jobs"""
+    try:
+        jobs = schedule.get_jobs()
+        if jobs:
+            job_info = []
+            for job in jobs:
+                job_info.append(f"{job.job_func.__name__} - {job.next_run}")
+            return StatusResponse(
+                status="success", 
+                message=f"Scheduler is running. Active jobs: {'; '.join(job_info)}"
+            )
+        else:
+            return StatusResponse(
+                status="warning", 
+                message="Scheduler is running but no jobs are scheduled"
+            )
+    except Exception as e:
+        return StatusResponse(
+            status="error", 
+            message=f"Scheduler error: {str(e)}"
+        )
+
+
 @app.get("/turn-off-charger", response_model=ChargerResponse, summary="Turn off charger", description="Turn off the smart charger/plug")
 def turn_off_charger():
     """Turn off the smart charger/plug"""
@@ -176,33 +206,39 @@ def main():
 
 def run_scheduler():
     """Run the scheduler in a separate thread"""
+    logging.info("Scheduler thread started")
     while True:
-        schedule.run_pending()
-        time.sleep(30)  # Check every 30 seconds
+        try:
+            schedule.run_pending()
+            time.sleep(30)  # Check every 30 seconds
+        except Exception as e:
+            logging.error(f"Scheduler error: {e}")
+            time.sleep(30)
 
 
 def setup_scheduler():
     """Setup scheduled tasks"""
-    # Schedule turn-on-charger daily at 1 PM
-    schedule.every().day.at("13:00").do(turn_on_charger)
+    # Schedule turn-on-charger every 4 hours
+    schedule.every(4).hours.do(turn_on_charger)
     
     # Schedule automate-modem every 5 minutes
     schedule.every(5).minutes.do(automateModem)
     
     logging.info("Scheduler setup complete:")
-    logging.info("- Daily turn-on-charger at 1:00 PM")
+    logging.info("- Every 4 hours turn-on-charger")
     logging.info("- Automate-modem every 5 minutes")
+    
+    # Turn on charger immediately
+    turn_on_charger()
     
     # Start scheduler in a separate thread
     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
     scheduler_thread.start()
+    logging.info(f"Scheduler thread started: {scheduler_thread.is_alive()}")
 
 
 if __name__ == '__main__':
     import uvicorn
-    
-    # Setup scheduler
-    setup_scheduler()
     
     # Start the FastAPI service with uvicorn
     uvicorn.run(app, host='0.0.0.0', port=8765, log_level="info")
