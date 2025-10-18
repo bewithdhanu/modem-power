@@ -1,5 +1,5 @@
 
-# ModemPower - Airtel Modem Control with Tuya Smart Plug
+# ModemPower 🔋 - Airtel Modem Control with Tuya Smart Plug
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
@@ -35,7 +35,7 @@ Before you get started, ensure you have the following:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/bewithdhanu/ModemPower.git
+   git clone https://github.com/bewithdhanu/modem-power.git
    cd ModemPower
    ```
 
@@ -55,7 +55,7 @@ Before you get started, ensure you have the following:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/bewithdhanu/ModemPower.git
+   git clone https://github.com/bewithdhanu/modem-power.git
    cd ModemPower
    ```
 
