@@ -12,7 +12,7 @@ ModemPower is an intelligent modem management system that automatically controls
 - **🔋 Battery Monitoring**: Automatically checks modem battery levels via local network
 - **⚡ Smart Power Management**: Automatically turns off modem when battery > 80%, turns on when < 20%
 - **🌐 FastAPI**: Modern RESTful API with automatic Swagger UI documentation
-- **⏰ Simple Cron Scheduling**: Uses standard crontab for easy schedule management
+- **⏰ Smart Scheduling**: Automated 4-hour charging cycles with 5-minute battery monitoring
 - **🔌 Tuya Integration**: Seamless control via Tuya Smart Plug
 - **🐳 Docker Support**: Easy deployment with Docker Compose
 - **📱 Cross-Platform**: Works on macOS, Linux, and Windows
@@ -136,10 +136,11 @@ Before you get started, ensure you have the following:
 | `/` | GET | **Redirects to Swagger UI** |
 | `/docs` | GET | **Swagger UI** - Interactive API documentation |
 | `/redoc` | GET | **ReDoc** - Alternative API documentation |
-| `/automate-modem` | GET | Run modem automation (check battery, turn on/off) |
-| `/turn-on-charger` | GET | Turn on charger (with modem reachability check) |
+| `/automate-modem` | GET | Run modem automation (check battery, turn on/off) - Auto-scheduled every 5 minutes |
+| `/turn-on-charger` | GET | Turn on charger (with modem reachability check) - Auto-scheduled every 4 hours |
 | `/turn-off-charger` | GET | Turn off charger |
 | `/restart-modem` | GET | Restart the modem |
+| `/scheduler-status` | GET | Check scheduler status and next scheduled jobs |
 
 > **🎯 Pro Tip**: Visit `http://localhost:8765/docs` to see the interactive Swagger UI where you can test all endpoints directly from your browser!
 
