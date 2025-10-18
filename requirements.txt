@@ -10,5 +10,6 @@ urllib3==1.26.7
 websocket-client==1.6.4
 xmltodict==0.13.0
 
-flask~=3.0.0
-schedule~=1.2.1
+fastapi~=0.104.0
+uvicorn[standard]~=0.24.0
+schedule~=1.2.0

@@ -1,0 +1,25 @@
+
+services:
+  modem-power:
+    build: .
+    container_name: modem-power-service
+    ports:
+      - "8765:8765"
+    environment:
+      - ACCESS_ID=${ACCESS_ID}
+      - ACCESS_KEY=${ACCESS_KEY}
+      - USERNAME=${USERNAME}
+      - PASSWORD=${PASSWORD}
+      - DEVICE_ID=${DEVICE_ID}
+      - ENDPOINT=${ENDPOINT}
+      - MODEM_IP=${MODEM_IP:-192.168.1.1}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - SENDER_NAME=${SENDER_NAME:-ModemPower}
+      - RECIPIENT_EMAIL=${RECIPIENT_EMAIL}
+      - RECIPIENT_NAME=${RECIPIENT_NAME:-User}
+      - TZ=${TZ:-Asia/Kolkata}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+

@@ -1,4 +1,15 @@
-from env import ENDPOINT, ACCESS_ID, ACCESS_KEY, USERNAME, PASSWORD, DEVICE_ID
+import os
+
+# Get environment variables with fallback to env.py for backward compatibility
+try:
+    from env import ENDPOINT, ACCESS_ID, ACCESS_KEY, USERNAME, PASSWORD, DEVICE_ID
+except ImportError:
+    ENDPOINT = os.getenv('ENDPOINT')
+    ACCESS_ID = os.getenv('ACCESS_ID')
+    ACCESS_KEY = os.getenv('ACCESS_KEY')
+    USERNAME = os.getenv('USERNAME')
+    PASSWORD = os.getenv('PASSWORD')
+    DEVICE_ID = os.getenv('DEVICE_ID')
 
 from tuya_iot import TuyaOpenAPI, TUYA_LOGGER
 import logging
@@ -13,29 +24,39 @@ TUYA_LOGGER.setLevel(logging.DEBUG)
 
 
 def turnOff():
-    logging.info("Turning off modem")
-    commands = {'commands': [{"code": "switch_1", "value": False}, {"code": "countdown_1", "value": 0}]}
-    openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
+    try:
+        logging.info("Turning off modem")
+        commands = {'commands': [{"code": "switch_1", "value": False}, {"code": "countdown_1", "value": 0}]}
+        response = openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
+        logging.info(f"Turn off response: {response}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to turn off modem: {e}")
+        return False
 
 
 def turnOn():
-    logging.info("Turning on modem")
-    commands = {'commands': [{"code": "switch_1", "value": True}, {"code": "countdown_1", "value": 0}]}
-    openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
+    try:
+        logging.info("Turning on modem")
+        commands = {'commands': [{"code": "switch_1", "value": True}, {"code": "countdown_1", "value": 0}]}
+        response = openapi.post('/v1.0/devices/{}/commands'.format(DEVICE_ID), commands)
+        logging.info(f"Turn on response: {response}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to turn on modem: {e}")
+        return False
 
 
 def getStatus():
-    resource = openapi.get('/v1.0/devices/{}/status'.format(DEVICE_ID))
-    # Parse the JSON response and get the data
-    # response_data = resource.json()
-
-    # Now 'response_data' contains the JSON data from the response
-    # You can access specific data fields using dictionary notation
-    # For example, if the response contains a 'status' field:
-    commands = resource.get('result')
-    if commands:
-        for command in commands:
-            if command['code'] == 'switch_1':
-                return command['value']
-    return False
+    try:
+        resource = openapi.get('/v1.0/devices/{}/status'.format(DEVICE_ID))
+        commands = resource.get('result')
+        if commands:
+            for command in commands:
+                if command['code'] == 'switch_1':
+                    return command['value']
+        return False
+    except Exception as e:
+        logging.error(f"Failed to get device status: {e}")
+        return None
 
