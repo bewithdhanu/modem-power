@@ -69,6 +69,33 @@ class ChargerResponse(BaseModel):
     message: str
     internet_connected: bool = None
 
+def check_modem_reachability_with_retry(max_attempts=5, retry_interval=60):
+    """
+    Check modem reachability with retry logic
+    
+    Args:
+        max_attempts (int): Maximum number of attempts (default: 5)
+        retry_interval (int): Time between retries in seconds (default: 60)
+    
+    Returns:
+        bool: True if modem is reachable, False if all attempts failed
+    """
+    for attempt in range(1, max_attempts + 1):
+        logging.info(f"Checking modem reachability - Attempt {attempt}/{max_attempts}")
+        
+        if isModemReachable():
+            logging.info(f"Modem is reachable on attempt {attempt}")
+            return True
+        
+        if attempt < max_attempts:
+            logging.warning(f"Modem not reachable on attempt {attempt}, retrying in {retry_interval} seconds...")
+            time.sleep(retry_interval)
+        else:
+            logging.error(f"Modem not reachable after {max_attempts} attempts")
+    
+    return False
+
+
 def send_email_notification(subject, message):
     """Send email notification via Brevo API"""
     try:
@@ -181,16 +208,16 @@ def turn_off_charger():
 @app.get("/turn-on-charger", response_model=ChargerResponse, summary="Turn on charger", description="Turn on the smart charger/plug with modem reachability check")
 def turn_on_charger():
     """Turn on the smart charger/plug with modem reachability check"""
-    # Check if modem is reachable before turning on
-    if not isModemReachable():
-        logging.error("Modem is not reachable, sending notification")
+    # Check if modem is reachable with retry logic (5 attempts, 1 minute apart)
+    if not check_modem_reachability_with_retry(max_attempts=5, retry_interval=60):
+        logging.error("Modem is not reachable after 5 attempts, sending notification")
         send_email_notification(
             "Modem Unreachable - Manual Intervention Required",
-            "The modem at 192.168.1.1 is not reachable. Please manually turn on the modem."
+            "The modem at 192.168.1.1 is not reachable after 5 attempts (5 minutes). Please manually turn on the modem."
         )
         return ChargerResponse(
             status="error",
-            message="Modem not reachable, email notification sent",
+            message="Modem not reachable after 5 attempts, email notification sent",
             internet_connected=False
         )
 
@@ -227,9 +254,6 @@ def setup_scheduler():
     logging.info("Scheduler setup complete:")
     logging.info("- Every 4 hours turn-on-charger")
     logging.info("- Automate-modem every 5 minutes")
-    
-    # Turn on charger immediately
-    turn_on_charger()
     
     # Start scheduler in a separate thread
     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
